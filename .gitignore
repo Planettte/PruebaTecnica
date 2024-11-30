@@ -1,0 +1,40 @@
+# .NET Core
+# Ignorar los binarios y archivos de compilación
+bin/
+obj/
+
+# Ignorar archivos generados por Visual Studio
+.vs/
+.vscode/
+.idea/
+
+# Ignorar archivos de configuración locales
+appsettings.Development.json
+appsettings.*.json
+user secrets
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Ignorar carpetas de dependencias de NuGet
+.nuget/
+
+# Ignorar los archivos de la base de datos local (si tienes alguna base de datos local en desarrollo)
+*.mdf
+*.ldf
+
+# Ignorar paquetes descargados
+*.nupkg
+
+# Ignorar la caché de Entity Framework
+# Esto es útil para evitar que se suban migraciones de EF innecesarias
+Migrations/
+
+# Ignorar archivos de logs
+*.log
+
+# Ignorar archivos temporales de Visual Studio
+# Para evitar que los archivos generados por Visual Studio sean versionados
+*.vspscc
+*.vssscc

@@ -1,0 +1,53 @@
+﻿@page "/curso-detalle/{id:int}"
+@inject Models.AppDbContext DbContext
+@using PruebaTecnica.Models
+@using Microsoft.EntityFrameworkCore;
+
+
+@if (Curso == null)
+{
+    <div class="alert alert-danger">
+        <h1>Curso no encontrado</h1>
+        <p>No se pudo encontrar el curso con el ID especificado.</p>
+    </div>
+}
+else
+{
+    <div class="container mt-4">
+        <h1>@Curso.Nombre</h1>
+        <p>@Curso.Descripcion</p>
+        <p><strong>Fecha de Creación:</strong> @Curso.FechaCreacion.ToShortDateString()</p>
+
+        <h3>Evaluaciones</h3>
+        <ul>
+            @if (Curso.Evaluaciones != null && Curso.Evaluaciones.Any())
+            {
+                @foreach (var evaluacion in Curso.Evaluaciones)
+                {
+                    <li>@evaluacion.Titulo</li>
+                }
+            }
+            else
+            {
+                <li>No hay evaluaciones asociadas.</li>
+            }
+        </ul>
+    </div>
+}
+
+@code {
+    [Parameter] public int Id { get; set; }
+    private Cursos? Curso;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Curso = await DbContext.Cursos
+            .Include(c => c.Evaluaciones)
+            .FirstOrDefaultAsync(c => c.CursoId == Id);
+
+        if (Curso == null)
+        {
+            throw new Exception("Curso no encontrado");
+        }
+    }
+}

@@ -1,0 +1,40 @@
+﻿@page "/historial-evaluaciones"
+@inject HttpClient Http
+@using Models
+
+<h3>Historial de Evaluaciones</h3>
+
+<ul>
+    @if (Historial.Any())
+    {
+        @foreach (var intento in Historial)
+        {
+            <li>
+                <strong>@intento.Evaluacion.Titulo</strong> -
+                Puntaje: @intento.Calificacion -
+                Fecha: @intento.FechaInicio.ToShortDateString()
+            </li>
+        }
+    }
+    else
+    {
+        <li>No se encontraron evaluaciones en el historial.</li>
+    }
+</ul>
+
+@code {
+    private List<Intentos> Historial = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Usar un ID de usuario fijo, por ejemplo: UsuarioID = 1
+        try
+        {
+            Historial = await Http.GetFromJsonAsync<List<Intentos>>("api/evaluaciones/historial/1"); // Simulando UsuarioID = 1
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar el historial: {ex.Message}");
+        }
+    }
+}

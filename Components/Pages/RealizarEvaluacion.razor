@@ -1,0 +1,85 @@
+﻿@page "/realizar-evaluacion/{evaluacionId:int}"
+@inject Models.AppDbContext DbContext
+@using PruebaTecnica.Models
+@using Microsoft.EntityFrameworkCore
+
+<h3>Evaluación: @EvaluacionTitulo</h3>
+
+@if (Preguntas == null)
+{
+    <div class="alert alert-danger">
+        <h4>Error</h4>
+        <p>No se encontraron preguntas para esta evaluación.</p>
+    </div>
+}
+else if (Preguntas.Count == 0)
+{
+    <div class="alert alert-warning">
+        <p>No hay preguntas disponibles para esta evaluación.</p>
+    </div>
+}
+else
+{
+    @foreach (var pregunta in Preguntas)
+    {
+        <div>
+            <p>@pregunta.Texto</p>
+            @if (pregunta.Respuesta != null && pregunta.Respuesta.Any())
+            {
+                @foreach (var respuesta in pregunta.Respuesta)
+                {
+                    <div>
+                        <input type="radio" name="@pregunta.PreguntaId" value="@respuesta.RespuestaId" />
+                        @respuesta.Texto
+                    </div>
+                }
+            }
+            else
+            {
+                <p><em>No hay respuestas para esta pregunta.</em></p>
+            }
+        </div>
+    }
+}
+
+<button class="btn btn-primary" @onclick="FinalizarEvaluacion">Finalizar</button>
+
+@code {
+    [Parameter] public int EvaluacionId { get; set; }
+    private string EvaluacionTitulo = "";
+    private List<Preguntas> Preguntas = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Cargar preguntas directamente desde el DbContext
+            var evaluacion = await DbContext.Evaluaciones
+                .Include(e => e.Pregunta)
+                .ThenInclude(p => p.Respuesta)
+                .FirstOrDefaultAsync(e => e.EvaluacionId == EvaluacionId);
+
+            if (evaluacion != null)
+            {
+                EvaluacionTitulo = evaluacion.Titulo;
+                Preguntas = evaluacion.Pregunta.ToList();
+
+                Console.WriteLine($"Se encontraron {Preguntas.Count} preguntas para la evaluación con ID: {EvaluacionId}");
+            }
+            else
+            {
+                Console.WriteLine($"No se encontró la evaluación con ID: {EvaluacionId}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error cargando preguntas: {ex.Message}");
+        }
+    }
+
+    private void FinalizarEvaluacion()
+    {
+        // Lógica para finalizar la evaluación
+        Console.WriteLine("Evaluación finalizada.");
+    }
+}

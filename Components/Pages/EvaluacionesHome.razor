@@ -1,0 +1,20 @@
+﻿@page "/evaluacionesHome"
+@inject HttpClient Http
+@using Models
+
+<div class="container mt-4">
+    <h1>Evaluaciones</h1>
+    <p>Desde esta página puedes ver tu historial de evaluaciones y realizar nuevas evaluaciones.</p>
+
+    <!-- Botones de navegación -->
+    <div class="mt-4">
+        <a href="/historial-evaluaciones" class="btn btn-primary me-2">Ver Historial de Evaluaciones</a>
+        <a href="/cursos" class="btn btn-secondary">Ver Cursos Disponibles</a>
+    </div>
+
+    <!-- Opcional: Mostrar información adicional -->
+    <div class="mt-5">
+        <h3>Información Importante</h3>
+        <p>Para realizar una evaluación, primero selecciona un curso en el catálogo de cursos.</p>
+    </div>
+</div>

@@ -1,0 +1,36 @@
+﻿@page "/cursos"
+@inject Models.AppDbContext DbContext
+@using Models
+@using Microsoft.EntityFrameworkCore;
+
+<div class="container mt-4">
+    <h1>Catálogo de Cursos</h1>
+    <div class="row">
+        @foreach (var curso in Cursos)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">@curso.Nombre</h5>
+                        <p class="card-text">@curso.Descripcion</p>
+                        <div>
+                            <!-- Botón para ver detalles del curso -->
+                            <a href="/curso-detalle/@curso.CursoId" class="btn btn-primary me-2">Ver Detalles</a>
+                            <!-- Botón para acceder a evaluaciones del curso -->
+                            <a href="/curso-evaluaciones/@curso.CursoId" class="btn btn-secondary">Ver Evaluaciones</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private List<Cursos> Cursos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Cursos = await DbContext.Cursos.ToListAsync();
+    }
+}
