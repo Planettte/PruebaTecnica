@@ -1,0 +1,78 @@
+﻿@page "/login"
+@inject Models.AppDbContext DbContext
+@inject NavigationManager NavigationManager
+@inject IHttpContextAccessor HttpContextAccessor
+@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Authentication.Cookies
+@using Microsoft.AspNetCore.Authentication
+@using Microsoft.AspNetCore.WebUtilities
+
+<h3>Iniciar Sesión</h3>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-danger">@ErrorMessage</div>
+}
+
+<div>
+    <label>Email:</label>
+    <input @bind="Email" type="text" />
+</div>
+<div>
+    <label>Contraseña:</label>
+    <input @bind="Password" type="password" />
+</div>
+<div>
+    <button class="btn btn-primary mt-3" @onclick="IniciarSesion">Iniciar Sesión</button>
+</div>
+
+@code {
+    private string Email { get; set; } = "";
+    private string Password { get; set; } = "";
+    private string ErrorMessage { get; set; } = "";
+
+    // Parámetro para manejar el ReturnUrl
+    [Parameter]
+    public string? ReturnUrl { get; set; } = "/";
+
+    private async Task IniciarSesion()
+    {
+        try
+        {
+            // Validar usuario en la base de datos
+            var usuario = await DbContext.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == Email && u.Contraseña == Password);
+
+            if (usuario != null)
+            {
+                // Crear cookie de autenticación
+                var claims = new List<Claim>
+        {
+                    new Claim(ClaimTypes.Name, usuario.Nombre),
+                    new Claim(ClaimTypes.Email, usuario.Email)
+                };
+
+                var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var principal = new ClaimsPrincipal(identity);
+
+                // Iniciar sesión
+                await HttpContextAccessor.HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    principal);
+
+                // Navegar al ReturnUrl
+                var uri = QueryHelpers.AddQueryString(ReturnUrl ?? "/", "loggedIn", "true");
+                NavigationManager.NavigateTo(uri);
+            }
+            else
+            {
+                ErrorMessage = "Email o contraseña incorrectos.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Error al iniciar sesión: {ex.Message}";
+        }
+    }
+}

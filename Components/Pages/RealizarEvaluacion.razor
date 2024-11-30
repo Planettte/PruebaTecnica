@@ -1,7 +1,9 @@
 ﻿@page "/realizar-evaluacion/{evaluacionId:int}"
+@inject NavigationManager NavigationManager
 @inject Models.AppDbContext DbContext
 @using PruebaTecnica.Models
 @using Microsoft.EntityFrameworkCore
+
 
 <h3>Evaluación: @EvaluacionTitulo</h3>
 
@@ -53,7 +55,7 @@ else
     {
         try
         {
-            // Cargar preguntas directamente desde el DbContext
+            // Cargar preguntas directamente desde DbContext
             var evaluacion = await DbContext.Evaluaciones
                 .Include(e => e.Pregunta)
                 .ThenInclude(p => p.Respuesta)
@@ -63,23 +65,17 @@ else
             {
                 EvaluacionTitulo = evaluacion.Titulo;
                 Preguntas = evaluacion.Pregunta.ToList();
-
-                Console.WriteLine($"Se encontraron {Preguntas.Count} preguntas para la evaluación con ID: {EvaluacionId}");
-            }
-            else
-            {
-                Console.WriteLine($"No se encontró la evaluación con ID: {EvaluacionId}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error cargando preguntas: {ex.Message}");
+            Console.WriteLine($"Error al cargar las preguntas: {ex.Message}");
         }
     }
 
     private void FinalizarEvaluacion()
     {
-        // Lógica para finalizar la evaluación
-        Console.WriteLine("Evaluación finalizada.");
+        // Redirigir al historial
+        NavigationManager.NavigateTo("/historial-evaluaciones");
     }
 }

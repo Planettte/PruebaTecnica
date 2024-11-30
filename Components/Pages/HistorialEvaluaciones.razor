@@ -1,40 +1,67 @@
 ﻿@page "/historial-evaluaciones"
-@inject HttpClient Http
-@using Models
+@inject Models.AppDbContext DbContext
+@using PruebaTecnica.Models
+@using Microsoft.EntityFrameworkCore
+
 
 <h3>Historial de Evaluaciones</h3>
 
-<ul>
-    @if (Historial.Any())
-    {
+@if (Historial == null)
+{
+    <div class="alert alert-danger">
+        <h4>Error</h4>
+        <p>No se pudo cargar el historial de evaluaciones.</p>
+    </div>
+}
+else if (!Historial.Any())
+{
+    <div class="alert alert-warning">
+        <p>No se encontraron evaluaciones en el historial.</p>
+    </div>
+}
+else
+{
+    <ul>
         @foreach (var intento in Historial)
         {
             <li>
                 <strong>@intento.Evaluacion.Titulo</strong> -
-                Puntaje: @intento.Calificacion -
-                Fecha: @intento.FechaInicio.ToShortDateString()
+                <span>Puntaje: @(intento.Calificacion.HasValue ? intento.Calificacion.ToString() : "No calificado")</span> -
+                <span>Inicio: @intento.FechaInicio.ToShortDateString()</span> -
+                <span>Fin: @(intento.FechaFin.HasValue ? intento.FechaFin.Value.ToShortDateString() : "No finalizado")</span>
             </li>
         }
-    }
-    else
-    {
-        <li>No se encontraron evaluaciones en el historial.</li>
-    }
-</ul>
+    </ul>
+}
 
 @code {
     private List<Intentos> Historial = new();
 
     protected override async Task OnInitializedAsync()
     {
-        // Usar un ID de usuario fijo, por ejemplo: UsuarioID = 1
         try
         {
-            Historial = await Http.GetFromJsonAsync<List<Intentos>>("api/evaluaciones/historial/1"); // Simulando UsuarioID = 1
+            // Usuario fijo para simular la autenticación
+            int usuarioId = 2;
+
+            // Consulta para cargar los intentos junto con el nombre de la evaluación
+            Historial = await DbContext.Intentos
+                .Include(i => i.Evaluacion) // Relación con Evaluaciones
+                .Where(i => i.UsuarioId == usuarioId)
+                .ToListAsync();
+
+            if (!Historial.Any())
+            {
+                Console.WriteLine($"No se encontraron intentos para el usuario con ID: {usuarioId}");
+            }
+            else
+            {
+                Console.WriteLine($"Se cargaron {Historial.Count} intentos para el usuario con ID: {usuarioId}");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al cargar el historial: {ex.Message}");
+            Console.WriteLine($"Error al cargar el historial de evaluaciones: {ex.Message}");
         }
     }
 }
